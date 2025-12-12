@@ -209,6 +209,7 @@ class DBEngine:
 
             return create_engine(f"sqlite:///{self.temp_file.name}")
         else:
+            print(f"self.db_url : {self.db_url}")
             return create_engine(url=self.db_url)
 
     def __del__(self):
