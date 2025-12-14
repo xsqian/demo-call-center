@@ -198,17 +198,17 @@ class DBEngine:
             # upload sqlite.db to project container
             v3io_client = v3io.dataplane.Client()
             container="projects"
-            path="call-center-demo"
+            path="call-center-demo/sqlite.db"
             print(f"File to be uploaded to {container}/{path}.")
             try:
-                with open(file, "rb") as f:
+                with open(self.temp_file.name, "rb") as f:
                     response = v3io_client.object.put(
                         container=container,
                         path=path,
                         body=f
                     )
                 print(f"Put status: {response.status_code}")
-                print(f"Put container: {container}, path: {path}")
+                print(f"Put object to container: {container}, path: {path}")
             except Exception as e:
                 print(f"An error occurred: {e}")
 
