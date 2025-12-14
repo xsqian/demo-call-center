@@ -228,10 +228,12 @@ class DBEngine:
             #no bucket name, this is Iguazio case, download from projects container to local
             try:
                 v3io_client = v3io.dataplane.Client()
+                container="projects"
+                path="call-center-demo"
                 response = v3io_client.object.get(container=container, path=path)
                 if response.status_code == 200:
                     file_content = response.body
-                    with open(file, 'wb') as tmpfile:
+                    with open(self.temp_file.name, 'wb') as tmpfile:
                         tmpfile.write(file_content)
                 else:
                     print(f"Failed to retrieve object. Status Code: {response.status_code}")
