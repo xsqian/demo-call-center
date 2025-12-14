@@ -199,7 +199,7 @@ class DBEngine:
             v3io_client = v3io.dataplane.Client()
             container="projects"
             path="call-center-demo"
-            print(f"File {file} to be uploaded to {container}/{path}.")
+            print(f"File to be uploaded to {container}/{path}.")
             try:
                 with open(file, "rb") as f:
                     response = v3io_client.object.put(
