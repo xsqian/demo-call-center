@@ -229,7 +229,7 @@ class DBEngine:
             try:
                 v3io_client = v3io.dataplane.Client()
                 container="projects"
-                path="call-center-demo"
+                path="call-center-demo/sqlite.db"
                 response = v3io_client.object.get(container=container, path=path)
                 if response.status_code == 200:
                     file_content = response.body
