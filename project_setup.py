@@ -15,6 +15,8 @@ import os
 from pathlib import Path
 import boto3
 import mlrun
+import v3io.dataplane
+import tempfile
 
 from src.calls_analysis.db_management import create_tables
 from src.common import ProjectSecrets
@@ -61,9 +63,11 @@ def setup(
             )
             os.environ["S3_BUCKET_NAME"] = bucket_name
         else:
-            os.environ["MYSQL_URL"] = f"sqlite:////User/demo-call-center/data/sqlite.db"
+            _upload_sqlite(container="projects", path=f"{project.name}/sqlite.db", file="data/sqlite.db")
+            os.environ["MYSQL_URL"] = f"{project.name}/sqlite.db"
             mysql_url = os.environ["MYSQL_URL"]
             print(f'mysql_url = {mysql_url}')
+
     # Set the project git source:
     if source:
         print(f"Project Source: {source}")
@@ -125,6 +129,23 @@ def setup(
     project.save()
     return project
 
+# upload from local to projects container
+def _upload_sqlite(container: str = "projects", path: str="call-center-demo", file: str = "sqlite.db"):
+    v3io_client = v3io.dataplane.Client()
+    print(f"File {file} to be uploaded to {container}/{path}.")
+
+    try:
+        with open(file, "rb") as f:
+            response = v3io_client.object.put(
+                container=container,
+                path=path,
+                body=f
+            )
+        print(f"Put status: {response.status_code}")
+        print(f"Put container: {container}, path: {path}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 def _build_image(project: mlrun.projects.MlrunProject, with_gpu: bool, default_image):
     config = {
         "base_image": "mlrun/mlrun-gpu" if with_gpu else "mlrun/mlrun-kfp",
@@ -179,7 +200,6 @@ def _build_image(project: mlrun.projects.MlrunProject, with_gpu: bool, default_i
         set_as_default=True,
         overwrite_build_params=True
     )
-    
     
 def _set_secrets(
     project: mlrun.projects.MlrunProject,

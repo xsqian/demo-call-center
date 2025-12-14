@@ -196,11 +196,10 @@ class DBEngine:
             s3.upload_file(self.temp_file.name, self.bucket_name, "sqlite.db")
 
     def _create_engine(self):
+        # Create a temporary file that will persist throughout the object's lifetime
+        self.temp_file = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
+        self.temp_file.close()  # Close the file but keep the name
         if self.bucket_name:
-            # Create a temporary file that will persist throughout the object's lifetime
-            self.temp_file = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
-            self.temp_file.close()  # Close the file but keep the name
-
             s3 = boto3.client("s3")
             try:
                 s3.download_file(self.bucket_name, "sqlite.db", self.temp_file.name)
@@ -209,8 +208,25 @@ class DBEngine:
 
             return create_engine(f"sqlite:///{self.temp_file.name}")
         else:
-            print(f"self.db_url : {self.db_url}")
-            return create_engine(url=self.db_url)
+            #no bucket name, this is Iguazio case
+            _download_sqlite(container="projects", path="call-center-demo/sqlite.db", file=self.temp_file.name)
+            return create_engine(f"sqlite:///{self.temp_file.name}")
+
+
+    # download from projects container to local
+    def _download_sqlite(container: str = "projects", path: str="call-center-demo", file: str = "sqlite.db"):
+        try:
+            v3io_client = v3io.dataplane.Client()
+            response = v3io_client.object.get(container=container, path=path)
+            if response.status_code == 200:
+                file_content = response.body
+                with open(file, 'wb') as tmpfile:
+                    tmpfile.write(file_content)
+
+            else:
+                print(f"Failed to retrieve object. Status Code: {response.status_code}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
 
     def __del__(self):
         # Clean up the temporary file when the object is destroyed
