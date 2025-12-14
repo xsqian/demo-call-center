@@ -15,7 +15,7 @@ import datetime
 import os
 import tempfile
 from typing import List, Optional, Tuple
-
+import v3io.dataplane
 import boto3
 import mlrun
 import pandas as pd
@@ -194,21 +194,23 @@ class DBEngine:
         if self.bucket_name:
             s3 = boto3.client("s3")
             s3.upload_file(self.temp_file.name, self.bucket_name, "sqlite.db")
-
-    # download from projects container to local
-    def _download_sqlite(container: str = "projects", path: str="call-center-demo", file: str = "sqlite.db"):
-        try:
+        else:
+            # upload sqlite.db to project container
             v3io_client = v3io.dataplane.Client()
-            response = v3io_client.object.get(container=container, path=path)
-            if response.status_code == 200:
-                file_content = response.body
-                with open(file, 'wb') as tmpfile:
-                    tmpfile.write(file_content)
-
-            else:
-                print(f"Failed to retrieve object. Status Code: {response.status_code}")
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
+            container="projects"
+            path="call-center-demo"
+            print(f"File {file} to be uploaded to {container}/{path}.")
+            try:
+                with open(file, "rb") as f:
+                    response = v3io_client.object.put(
+                        container=container,
+                        path=path,
+                        body=f
+                    )
+                print(f"Put status: {response.status_code}")
+                print(f"Put container: {container}, path: {path}")
+            except Exception as e:
+                print(f"An error occurred: {e}")
 
     def _create_engine(self):
         # Create a temporary file that will persist throughout the object's lifetime
@@ -223,8 +225,18 @@ class DBEngine:
 
             return create_engine(f"sqlite:///{self.temp_file.name}")
         else:
-            #no bucket name, this is Iguazio case
-            _download_sqlite(container="projects", path="call-center-demo/sqlite.db", file=self.temp_file.name)
+            #no bucket name, this is Iguazio case, download from projects container to local
+            try:
+                v3io_client = v3io.dataplane.Client()
+                response = v3io_client.object.get(container=container, path=path)
+                if response.status_code == 200:
+                    file_content = response.body
+                    with open(file, 'wb') as tmpfile:
+                        tmpfile.write(file_content)
+                else:
+                    print(f"Failed to retrieve object. Status Code: {response.status_code}")
+            except Exception as e:
+                print(f"Warning: Could not download database from projects path: {e}")            
             return create_engine(f"sqlite:///{self.temp_file.name}")
 
     def __del__(self):
