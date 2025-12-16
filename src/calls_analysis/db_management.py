@@ -215,6 +215,7 @@ class DBEngine:
     def _create_engine(self):
         # Create a temporary file that will persist throughout the object's lifetime
         self.temp_file = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
+        print(f"in _create_engine self.temp_file: {self.temp_file.name}"
         self.temp_file.close()  # Close the file but keep the name
         if self.bucket_name:
             s3 = boto3.client("s3")
@@ -222,8 +223,6 @@ class DBEngine:
                 s3.download_file(self.bucket_name, "sqlite.db", self.temp_file.name)
             except Exception as e:
                 print(f"Warning: Could not download database from S3: {e}")
-
-            return create_engine(f"sqlite:///{self.temp_file.name}")
         else:
             #no bucket name, this is Iguazio case, download from projects container to local
             try:
@@ -239,8 +238,8 @@ class DBEngine:
                     print(f"Failed to retrieve object. Status Code: {response.status_code}")
             except Exception as e:
                 print(f"Warning: Could not download database from projects path: {e}")
-            print(f"create engine with sqlite:///{self.temp_file.name}")
-            return create_engine(f"sqlite:///{self.temp_file.name}")
+        print(f"create engine with sqlite:///{self.temp_file.name}")
+        return create_engine(f"sqlite:///{self.temp_file.name}")
 
     def __del__(self):
         # Clean up the temporary file when the object is destroyed
