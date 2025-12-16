@@ -238,7 +238,8 @@ class DBEngine:
                 else:
                     print(f"Failed to retrieve object. Status Code: {response.status_code}")
             except Exception as e:
-                print(f"Warning: Could not download database from projects path: {e}")            
+                print(f"Warning: Could not download database from projects path: {e}")
+            print(f"create engine with sqlite:///{self.temp_file.name}")
             return create_engine(f"sqlite:///{self.temp_file.name}")
 
     def __del__(self):
