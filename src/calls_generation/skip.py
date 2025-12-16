@@ -140,6 +140,7 @@ def skip_and_import_local_data(language: str):
 def _insert_agents_and_clients_to_db(agents: list, clients: list):
     # Create an engine:
     engine = DBEngine()
+    print(f'engin: {engine} created.')
 
     # Initialize a session maker:
     session = engine.get_session()
