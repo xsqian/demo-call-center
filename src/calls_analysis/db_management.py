@@ -215,7 +215,7 @@ class DBEngine:
     def _create_engine(self):
         # Create a temporary file that will persist throughout the object's lifetime
         self.temp_file = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
-        print(f"in _create_engine self.temp_file: {self.temp_file.name})"
+        print(f"in _create_engine self.temp_file: {self.temp_file.name}")
         self.temp_file.close()  # Close the file but keep the name
         if self.bucket_name:
             s3 = boto3.client("s3")
