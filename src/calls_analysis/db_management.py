@@ -201,14 +201,15 @@ class DBEngine:
             path="call-center-demo/sqlite.db"
             print(f"File to be uploaded to {container}/{path}.")
             try:
+                print(f"in update_db self.temp_file.name: {self.temp_file.name}")
                 with open(self.temp_file.name, "rb") as f:
                     response = v3io_client.object.put(
                         container=container,
                         path=path,
                         body=f
                     )
-                print(f"Put status: {response.status_code}")
-                print(f"Put object to container: {container}, path: {path}")
+                print(f"in update_db Put status: {response.status_code}")
+                print(f"update_db    Put object to container: {container}, path: {path}")
             except Exception as e:
                 print(f"An error occurred: {e}")
 
@@ -260,9 +261,9 @@ def create_tables():
     # Base.metadata.drop_all(engine.engine)
     # Create the schema's tables
     Base.metadata.create_all(engine.engine)
-
+    print('Tables created!')
     engine.update_db()
-    print('tables created!')
+    print('After engine.update_db!')
 
 def insert_clients(clients: list):
     # Create an engine:
