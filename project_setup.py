@@ -212,8 +212,8 @@ def _set_secrets(
     openai_base: str,
     mysql_url: str,
     bucket_name: str = None,
-    container: str,
-    path: str,
+    container: str = "projects",
+    path: str = "demo-call-center/sqlite.db"
 ):
     # Must have secrets:
     assert openai_key and openai_base, "openai_key and openai_base must be set"
