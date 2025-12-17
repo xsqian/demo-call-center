@@ -21,7 +21,7 @@ class ProjectSecrets:
     MYSQL_CONNECT_ARGS = "MYSQL_CONNECT_ARGS"
     S3_BUCKET_NAME = "S3_BUCKET_NAME"
     CONTAINER = "CONTAINER"
-    PATH = "PATH"
+    DBPATH = "DBPATH"
 
 
 class CallStatus(enum.Enum):

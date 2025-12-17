@@ -40,7 +40,7 @@ def setup(
     openai_base = os.getenv(ProjectSecrets.OPENAI_API_BASE)
     mysql_url = os.getenv(ProjectSecrets.MYSQL_URL, "")
     container = os.getenv(ProjectSecrets.CONTAINER, "projects")
-    path = os.getenv(ProjectSecrets.PATH, "demo-call-center/sqlite.db")
+    db_path = os.getenv(ProjectSecrets.DBPATH, "demo-call-center/sqlite.db")
     # Unpack parameters:
     source = project.get_param(key="source")
     default_image = project.get_param(key="default_image", default=None)
@@ -65,11 +65,11 @@ def setup(
             os.environ["S3_BUCKET_NAME"] = bucket_name
         else:
             os.environ["CONTAINER"] = "projects"
-            os.environ["PATH"] = f"{project.name}/sqlite.db"
+            os.environ["DBPATH"] = f"{project.name}/sqlite.db"
             container = os.environ["CONTAINER"]
-            path = os.environ["PATH"]
-            _upload_sqlite(container=container, path=path, file="data/sqlite.db")
-            print(f'container = {container}, path = {path}')
+            db_path = os.environ["DBPATH"]
+            _upload_sqlite(container=container, db_path=db_path, file="data/sqlite.db")
+            print(f'container = {container}, db_path = {db_path}')
 
     # Set the project git source:
     if source:
@@ -135,19 +135,19 @@ def setup(
     return project
 
 # upload from local to projects container
-def _upload_sqlite(container: str = "projects", path: str="call-center-demo", file: str = "sqlite.db"):
+def _upload_sqlite(container: str = "projects", db_path: str="call-center-demo", file: str = "sqlite.db"):
     v3io_client = v3io.dataplane.Client()
-    print(f"File {file} to be uploaded to {container}/{path}.")
+    print(f"File {file} to be uploaded to {container}/{db_path}.")
 
     try:
         with open(file, "rb") as f:
             response = v3io_client.object.put(
                 container=container,
-                path=path,
+                db_path=db_path,
                 body=f
             )
         print(f"Put status: {response.status_code}")
-        print(f"Put container: {container}, path: {path}")
+        print(f"Put container: {container}, db_path: {db_path}")
     except Exception as e:
         print(f"An error occurred: {e}")
 
@@ -213,7 +213,7 @@ def _set_secrets(
     mysql_url: str,
     bucket_name: str = None,
     container: str = "projects",
-    path: str = "demo-call-center/sqlite.db"
+    db_path: str = "demo-call-center/sqlite.db"
 ):
     # Must have secrets:
     assert openai_key and openai_base, "openai_key and openai_base must be set"
@@ -234,7 +234,7 @@ def _set_secrets(
         project.set_secrets(
             secrets={
                 ProjectSecrets.CONTAINER: container,
-                ProjectSecrets.PATH: path,
+                ProjectSecrets.DBPATH: db_path,
             }
         )
 
