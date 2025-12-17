@@ -200,7 +200,7 @@ class DBEngine:
             # upload sqlite.db to project container
             container=self.container
             db_path=self.db_path
-            print(f"File to be uploaded to {container}/{db_path}.")
+
             try:
                 print(f"in update_db self.temp_file.name: {self.temp_file.name}")
                 v3io_client = v3io.dataplane.Client()
@@ -210,15 +210,13 @@ class DBEngine:
                         path=db_path,
                         body=f
                     )
-                print(f"in update_db Put status: {response.status_code}")
-                print(f"update_db    Put object to container: {container}, db_path: {db_path}")
+
             except Exception as e:
                 print(f"An error occurred: {e}")
 
     def _create_engine(self):
         # Create a temporary file that will persist throughout the object's lifetime
         self.temp_file = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
-        print(f"in _create_engine self.temp_file: {self.temp_file.name}")
         self.temp_file.close()  # Close the file but keep the name
         if self.bucket_name:
             s3 = boto3.client("s3")
@@ -241,7 +239,7 @@ class DBEngine:
                     print(f"Failed to retrieve object. Status Code: {response.status_code}")
             except Exception as e:
                 print(f"Warning: Could not download database from projects path: {e}")
-        print(f"create engine with sqlite:///{self.temp_file.name}")
+
         return create_engine(f"sqlite:///{self.temp_file.name}")
 
     def __del__(self):
@@ -265,7 +263,6 @@ def create_tables():
     Base.metadata.create_all(engine.engine)
     print('Tables created!')
     engine.update_db()
-    print('After engine.update_db!')
 
 def insert_clients(clients: list):
     # Create an engine:
