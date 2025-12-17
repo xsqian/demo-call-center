@@ -39,7 +39,8 @@ def setup(
     openai_key = os.getenv(ProjectSecrets.OPENAI_API_KEY)
     openai_base = os.getenv(ProjectSecrets.OPENAI_API_BASE)
     mysql_url = os.getenv(ProjectSecrets.MYSQL_URL, "")
-
+    container = os.getenv(ProjectSecrets.CONTAINER, "projects")
+    path = os.getenv(ProjectSecrets.PATH, "demo-call-center/sqlite.db")
     # Unpack parameters:
     source = project.get_param(key="source")
     default_image = project.get_param(key="default_image", default=None)
@@ -63,10 +64,12 @@ def setup(
             )
             os.environ["S3_BUCKET_NAME"] = bucket_name
         else:
-            _upload_sqlite(container="projects", path=f"{project.name}/sqlite.db", file="data/sqlite.db")
-            os.environ["MYSQL_URL"] = f"{project.name}/sqlite.db"
-            mysql_url = os.environ["MYSQL_URL"]
-            print(f'mysql_url = {mysql_url}')
+            os.environ["CONTAINER"] = "projects"
+            os.environ["PATH"] = f"{project.name}/sqlite.db"
+            container = os.environ["CONTAINER"]
+            path = os.environ["PATH"]
+            _upload_sqlite(container=container, path=path, file="data/sqlite.db")
+            print(f'container = {container}, path = {path}')
 
     # Set the project git source:
     if source:
@@ -90,6 +93,8 @@ def setup(
         openai_base=openai_base,
         mysql_url=mysql_url,
         bucket_name=os.getenv(ProjectSecrets.S3_BUCKET_NAME),
+        container=os.getenv(ProjectSecrets.CONTAINER),
+        path=os.getenv(ProjectSecrets.PATH),
     )
 
     # Refresh MLRun hub to the most up-to-date version:
@@ -207,6 +212,8 @@ def _set_secrets(
     openai_base: str,
     mysql_url: str,
     bucket_name: str = None,
+    container: str,
+    path: str,
 ):
     # Must have secrets:
     assert openai_key and openai_base, "openai_key and openai_base must be set"
@@ -221,6 +228,13 @@ def _set_secrets(
         project.set_secrets(
             secrets={
                 ProjectSecrets.S3_BUCKET_NAME: bucket_name,
+            }
+        )
+    else:
+        project.set_secrets(
+            secrets={
+                ProjectSecrets.CONTAINER: container,
+                ProjectSecrets.PATH: path,
             }
         )
 
