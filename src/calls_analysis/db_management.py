@@ -185,7 +185,7 @@ class DBEngine:
         self.bucket_name = mlrun.get_secret_or_env(key=ProjectSecrets.S3_BUCKET_NAME)
         self.db_url = mlrun.get_secret_or_env(key=ProjectSecrets.MYSQL_URL)
         self.container = mlrun.get_secret_or_env(key=ProjectSecrets.CONTAINER)
-        self.path = mlrun.get_secret_or_env(key=ProjectSecrets.PATH)
+        self.db_path = mlrun.get_secret_or_env(key=ProjectSecrets.DBPATH)
         self.temp_file = None
         self.engine = self._create_engine()
         
@@ -199,19 +199,19 @@ class DBEngine:
         else:
             # upload sqlite.db to project container
             container=self.container
-            path=self.path
-            print(f"File to be uploaded to {container}/{path}.")
+            db_path=self.db_path
+            print(f"File to be uploaded to {container}/{db_path}.")
             try:
                 print(f"in update_db self.temp_file.name: {self.temp_file.name}")
                 v3io_client = v3io.dataplane.Client()
                 with open(self.temp_file.name, "rb") as f:
                     response = v3io_client.object.put(
                         container=container,
-                        path=path,
+                        path=db_path,
                         body=f
                     )
                 print(f"in update_db Put status: {response.status_code}")
-                print(f"update_db    Put object to container: {container}, path: {path}")
+                print(f"update_db    Put object to container: {container}, db_path: {db_path}")
             except Exception as e:
                 print(f"An error occurred: {e}")
 
@@ -229,10 +229,10 @@ class DBEngine:
         else:
             #no bucket name, this is Iguazio case, download from projects container to local
             container=self.container
-            path=self.path
+            db_path=self.db_path
             try:
                 v3io_client = v3io.dataplane.Client()
-                response = v3io_client.object.get(container=container, path=path)
+                response = v3io_client.object.get(container=container, path=db_path)
                 if response.status_code == 200:
                     file_content = response.body
                     with open(self.temp_file.name, 'wb') as tmpfile:
