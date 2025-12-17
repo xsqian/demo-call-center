@@ -84,7 +84,7 @@ def skip_and_import_local_data(language: str):
     clients = yaml.load(clients.get(), Loader=yaml.FullLoader)
 
     # insert agent and client data to database:
-    _insert_agents_and_clients_to_db(agents, clients)
+    _insert_agents_and_clients_to_db(engine, agents, clients)
     print("- agents and clients inserted")
 
     # log zip files
