@@ -94,7 +94,7 @@ def setup(
         mysql_url=mysql_url,
         bucket_name=os.getenv(ProjectSecrets.S3_BUCKET_NAME),
         container=os.getenv(ProjectSecrets.CONTAINER),
-        path=os.getenv(ProjectSecrets.PATH),
+        db_path=os.getenv(ProjectSecrets.DBPATH),
     )
 
     # Refresh MLRun hub to the most up-to-date version:
