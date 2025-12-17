@@ -48,7 +48,7 @@ def setup(
     gpus = project.get_param(key="gpus", default=0)
     node_name = project.get_param(key="node_name", default=None)
     node_selector = project.get_param(key="node_selector", default=None)
-    use_sqlite = project.get_param(key="use_sqlite", default=False)
+    use_sqlite = project.get_param(key="use_sqlite", default=True)
 
     # Update sqlite data:
     if use_sqlite:
@@ -69,7 +69,6 @@ def setup(
             container = os.environ["CONTAINER"]
             db_path = os.environ["DBPATH"]
             _upload_sqlite(container=container, db_path=db_path, file="data/sqlite.db")
-            print(f'container = {container}, db_path = {db_path}')
 
     # Set the project git source:
     if source:
@@ -135,19 +134,16 @@ def setup(
     return project
 
 # upload from local to projects container
-def _upload_sqlite(container: str = "projects", db_path: str="call-center-demo", file: str = "sqlite.db"):
-    v3io_client = v3io.dataplane.Client()
-    print(f"File {file} to be uploaded to {container}/{db_path}.")
+def _upload_sqlite(container: str = "projects", db_path: str="call-center-demo/sqlite.db", file: str = "sqlite.db"):
 
     try:
+        v3io_client = v3io.dataplane.Client()
         with open(file, "rb") as f:
             response = v3io_client.object.put(
                 container=container,
-                db_path=db_path,
+                path=db_path,
                 body=f
             )
-        print(f"Put status: {response.status_code}")
-        print(f"Put container: {container}, db_path: {db_path}")
     except Exception as e:
         print(f"An error occurred: {e}")
 
@@ -276,7 +272,7 @@ def _set_function(
     if not CE_MODE and apply_auto_mount:
         # Apply auto mount:
         mlrun_function.apply(mlrun.auto_mount())
-        print('apply(mlrun.auto_mount()')
+
     # Save:
     mlrun_function.save()
 

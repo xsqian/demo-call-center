@@ -202,7 +202,6 @@ class DBEngine:
             db_path=self.db_path
 
             try:
-                print(f"in update_db self.temp_file.name: {self.temp_file.name}")
                 v3io_client = v3io.dataplane.Client()
                 with open(self.temp_file.name, "rb") as f:
                     response = v3io_client.object.put(
