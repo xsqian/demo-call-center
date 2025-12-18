@@ -22,7 +22,6 @@ from src.calls_analysis.db_management import create_tables
 from src.common import ProjectSecrets
 
 CE_MODE = mlrun.mlconf.is_ce_mode()
-print(f'CE_MODE = {CE_MODE}')
 
 def setup(
     project: mlrun.projects.MlrunProject,
@@ -126,8 +125,8 @@ def setup(
     ]
     app.save()
 
-    # Create the DB tables:
-    create_tables()
+    # # Create the DB tables:
+    # create_tables()
 
     # Save and return the project:
     project.save()
