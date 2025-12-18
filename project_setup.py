@@ -48,6 +48,7 @@ def setup(
     node_name = project.get_param(key="node_name", default=None)
     node_selector = project.get_param(key="node_selector", default=None)
     use_sqlite = project.get_param(key="use_sqlite", default=True)
+    skip_calls_generation = project.get_param(key="skip_calls_generation", default=False)
 
     # Update sqlite data:
     if use_sqlite:
@@ -56,18 +57,20 @@ def setup(
             s3 = boto3.client("s3") if not os.getenv("AWS_ENDPOINT_URL_S3") else boto3.client('s3', endpoint_url=os.getenv("AWS_ENDPOINT_URL_S3"))
             bucket_name = Path(mlrun.mlconf.artifact_path).parts[1]
             # Upload the file
-            s3.upload_file(
-                Filename="data/sqlite.db",
-                Bucket=bucket_name,
-                Key="sqlite.db",
-            )
+            if not skip_calls_generation:
+                s3.upload_file(
+                    Filename="data/sqlite.db",
+                    Bucket=bucket_name,
+                    Key="sqlite.db",
+                )
             os.environ["S3_BUCKET_NAME"] = bucket_name
         else:
             os.environ["CONTAINER"] = "projects"
             os.environ["DBPATH"] = f"{project.name}/sqlite.db"
             container = os.environ["CONTAINER"]
             db_path = os.environ["DBPATH"]
-            _upload_sqlite(container=container, db_path=db_path, file="data/sqlite.db")
+            if not skip_calls_generation:
+                _upload_sqlite(container=container, db_path=db_path, file="data/sqlite.db")
 
     # Set the project git source:
     if source:
