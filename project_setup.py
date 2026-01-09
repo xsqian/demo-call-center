@@ -81,6 +81,7 @@ def setup(
     # Set default image:
     if default_image:
         project.set_default_image(default_image)
+        print(f"set deafult image to : {default_image}")
 
     # Build the image:
     if build_image:
@@ -175,7 +176,7 @@ def _build_image(project: mlrun.projects.MlrunProject, with_gpu: bool, default_i
     ] if with_gpu else []
 
     other_requirements = [
-        "pip install mlrun langchain==0.2.17 openai==1.58.1 langchain_community==0.2.19 pydub==0.25.1 streamlit==1.28.0 st-annotated-text==4.0.1 spacy==3.7.1 librosa==0.10.1 presidio-anonymizer==2.2.34 presidio-analyzer==2.2.34 nltk==3.8.1 flair==0.13.0 htbuilder==0.6.2",
+        "pip install langchain==0.2.17 openai==1.58.1 langchain_community==0.2.19 pydub==0.25.1 streamlit==1.28.0 st-annotated-text==4.0.1 spacy==3.7.1 librosa==0.10.1 presidio-anonymizer==2.2.34 presidio-analyzer==2.2.34 nltk==3.8.1 flair==0.13.0 htbuilder==0.6.2",
         "pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1/en_core_web_lg-3.7.1.tar.gz",
         # "python -m spacy download en_core_web_lg",
 
@@ -282,7 +283,7 @@ def _set_function(
 def _set_calls_generation_functions(
     project: mlrun.projects.MlrunProject,
     node_name: str = None,
-    image: str = ".mlrun-project-image"
+    image: str = ".mlrun-project-image-call-center-demo"
 ):
     # Client and agent data generator
     _set_function(
@@ -290,6 +291,7 @@ def _set_calls_generation_functions(
         func="hub://structured_data_generator",
         name="structured-data-generator",
         kind="job",
+        image=image,
         node_name=node_name,
         apply_auto_mount=True,
     )
